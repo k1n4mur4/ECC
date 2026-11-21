@@ -141,13 +141,13 @@ plan -> test -> implement -> review -> verify -> remember -> improve
 
 ECC は MIT ライセンスのオープンソースです。現時点では Claude Code で最もよく機能し、サポート対象の Codex 同期パスを備え、Cursor、OpenCode、Gemini、Zed、GitHub Copilot、Antigravity、Qwen、その他のハーネス向けには機能が限定されたアダプターを提供しています。機能の同等性を前提にする前に、[サポート状況マトリクス](#プラットフォームサポート)を確認してください。
 
-68 の agents、293 の skills、94 のレガシー command シムに加えて、hooks、rules、メモリ、継続的学習、AgentShield セキュリティスキャンを利用できます。agents は計画、レビュー、ビルド修復、セキュリティ、アーキテクチャ、ドメイン作業に特化しています。
+72 の agents、328 の skills、99 のレガシー command シムに加えて、hooks、rules、メモリ、継続的学習、AgentShield セキュリティスキャンを利用できます。agents は計画、レビュー、ビルド修復、セキュリティ、アーキテクチャ、ドメイン作業に特化しています。
 
 | 含まれるもの     |        数 | 得られるもの                                                                          |
 | ---------------- | ----------: | ------------------------------------------------------------------------------------ |
-| Agents           |   68 agents | 計画、レビュー、ビルド修復、セキュリティ、アーキテクチャ、ドメイン作業                |
-| Skills           |  293 skills | TDD、リサーチ、セキュリティ、ドキュメント、フロントエンド、データ、ML、運用など       |
-| Commands         | 94 commands | ECC が skills ファーストの構成へ移行する間の便利なエントリーポイント                  |
+| Agents           |   72 agents | 計画、レビュー、ビルド修復、セキュリティ、アーキテクチャ、ドメイン作業                |
+| Skills           |  328 skills | TDD、リサーチ、セキュリティ、ドキュメント、フロントエンド、データ、ML、運用など       |
+| Commands         | 99 commands | ECC が skills ファーストの構成へ移行する間の便利なエントリーポイント                  |
 | Hooks とメモリ   |     ランタイム | 強制、セッションサマリー、継続的学習、instincts、コンテキスト制御                  |
 | Rules            |   選択式 | 言語やプロジェクトごとに選ぶ、常時ロードされる標準                                    |
 | AgentShield      |    同梱 | プロンプト、hooks、MCP 設定、パーミッション、シークレット、agent ファイルのスキャン    |
@@ -173,7 +173,7 @@ ECC は MIT ライセンスのオープンソースです。現時点では Clau
 Claude Code plugin のセットアップ、更新、スコープ変更、hook プロファイルの変更には次を使います。
 
 ```bash
-npx ecc-universal@2.2.1 setup
+npx ecc-universal@2.2.3 setup
 ```
 
 npm がバージョンまたはキャッシュのエラーを報告した場合は、再試行する前にレジストリのバージョンを確認してください。
@@ -186,12 +186,12 @@ ECC 2.2 は、モダンなパッケージランナーでも同じガイド付き
 
 | パッケージランナー | ガイド付きセットアップコマンド |
 |---|---|
-| npm / npx | `npx ecc-universal@2.2.1 setup` |
-| pnpm | `pnpm dlx ecc-universal@2.2.1 setup` |
-| Yarn 2+ | `yarn dlx ecc-universal@2.2.1 setup` |
-| Bun | `bunx ecc-universal@2.2.1 setup` |
+| npm / npx | `npx ecc-universal@2.2.3 setup` |
+| pnpm | `pnpm dlx ecc-universal@2.2.3 setup` |
+| Yarn 2+ | `yarn dlx ecc-universal@2.2.3 setup` |
+| Bun | `bunx ecc-universal@2.2.3 setup` |
 
-これらの例では、このリポジトリのリリースバージョンに対応する[公開済みの ECC 2.2.1 リリース](https://www.npmjs.com/package/ecc-universal/v/2.2.1)を指定しています。バージョンのピン留めはセキュリティ監査でも整合性チェックでもありません。パッケージのコードを実行する前にリリースのソースとレジストリの整合性を確認し、未リリースの変更にはレビュー済みのチェックアウトを使用してください。
+これらの例では、このリポジトリのリリースバージョンに対応する[公開済みの ECC 2.2.3 リリース](https://www.npmjs.com/package/ecc-universal/v/2.2.3)を指定しています。バージョンのピン留めはセキュリティ監査でも整合性チェックでもありません。パッケージのコードを実行する前にリリースのソースとレジストリの整合性を確認し、未リリースの変更にはレビュー済みのチェックアウトを使用してください。
 
 Yarn Classic 1 には `yarn dlx` がありません。`npx` を使うか、パッケージをグローバルにインストールするか、一時的なワンショット実行のために Yarn をアップグレードしてください。
 
@@ -200,7 +200,7 @@ Yarn Classic 1 には `yarn dlx` がありません。`npx` を使うか、パ�
 複数のコーディングエージェントを一つのレビュー済みフローで設定するには、マルチハーネスウィザードを使用します。
 
 ```bash
-npx ecc-universal@2.2.1 install --guided
+npx ecc-universal@2.2.3 install --guided
 ```
 
 Claude Code、Codex、Kimi Code の任意の組み合わせを選択でき、各インストールチャネルと配置先を表示し、最初の書き込み前にすべての選択をプリフライトし、最後に一度だけ確認を求めます。
@@ -214,7 +214,7 @@ Claude Code、Codex、Kimi Code の任意の組み合わせを選択でき、各
 自動化のためには、プロバイダー固有の選択をすべて明示してください。
 
 ```bash
-npx ecc-universal@2.2.1 install --guided \
+npx ecc-universal@2.2.3 install --guided \
   --harness claude --harness codex --harness kimi \
   --claude-scope local --claude-hooks standard \
   --profile core --yes
@@ -223,16 +223,16 @@ npx ecc-universal@2.2.1 install --guided \
 ネイティブのガイド付き Codex パスと管理された Kimi パスを、書き込みなしで先に検証するには次を実行します。
 
 ```bash
-npx ecc-universal@2.2.1 install --guided --harness codex --dry-run
-npx ecc-universal@2.2.1 install --profile core --target kimi --dry-run
+npx ecc-universal@2.2.3 install --guided --harness codex --dry-run
+npx ecc-universal@2.2.3 install --profile core --target kimi --dry-run
 ```
 
 2.2 エイリアスを通じて、追加のパッケージ名コマンドも利用できます。
 
 ```bash
-npx ecc-universal@2.2.1 consult "security reviews" --target claude
-npx ecc-universal@2.2.1 install --profile minimal --target claude --with capability:machine-learning
-npx ecc-universal@2.2.1 doctor --target kimi
+npx ecc-universal@2.2.3 consult "security reviews" --target claude
+npx ecc-universal@2.2.3 install --profile minimal --target claude --with capability:machine-learning
+npx ecc-universal@2.2.3 doctor --target kimi
 ```
 
 `npx ecc-install --profile minimal --target claude` は使用しないでください。`ecc-install` は `ecc-universal` 内のバイナリ名であり、個別に公開された npm パッケージではありません。
@@ -404,7 +404,7 @@ Cursor は agent 定義を `.cursor/agents/ecc-*.md` 配下にインストール
 ランタイム hooks なしで ECC の rules、agents、commands、プラットフォーム設定、コアワークフローを使いたい場合はこちらを使用します。
 
 ```bash
-npx ecc-universal@2.2.1 install --profile minimal --target claude
+npx ecc-universal@2.2.3 install --profile minimal --target claude
 ```
 
 ソースチェックアウトからの同等のコマンドは次のとおりです。
@@ -589,11 +589,11 @@ ECC 管理のインストールおよび Codex 同期フローは、重複を再
 プロジェクトディレクトリから次のコマンドを実行してください。
 
 ```bash
-npx ecc-universal@2.2.1 list-installed
-npx ecc-universal@2.2.1 doctor
-npx ecc-universal@2.2.1 repair
-npx ecc-universal@2.2.1 uninstall --dry-run
-npx ecc-universal@2.2.1 uninstall
+npx ecc-universal@2.2.3 list-installed
+npx ecc-universal@2.2.3 doctor
+npx ecc-universal@2.2.3 repair
+npx ecc-universal@2.2.3 uninstall --dry-run
+npx ecc-universal@2.2.3 uninstall
 ```
 
 ソースチェックアウトからの場合は、再インストールの前に管理状態を確認してください。
@@ -782,7 +782,7 @@ Kimi Code はインストールされた `.kimi-code/AGENTS.md` の指示と `.k
 
 ## 新機能
 
-現在のリリース：**2.2.1**（2026-08-31）。2.2 系のハイライト：
+現在のリリース：**2.2.3**（2026-10-01）。2.2 系のハイライト：
 
 - Claude Code、Codex、Kimi Code にわたるガイド付きのマニフェスト駆動セットアップ。install-state の所有権管理、doctor、repair、uninstall を備えています。
 - ネイティブの Antigravity インストール、薄い Pi アダプター、そして Linux、macOS、Windows でテストされたパック済みアーティファクトのリリースゲート。
@@ -798,9 +798,9 @@ Kimi Code はインストールされた `.kimi-code/AGENTS.md` の指示と `.k
 
 ```text
 ECC/
-|-- agents/           # 委譲用の 68 の専門サブエージェント
-|-- skills/           # オンデマンドで読み込まれる 293 の再利用可能なワークフロー
-|-- commands/         # メンテナンスされている 94 のスラッシュコマンドシム
+|-- agents/           # 委譲用の 72 の専門サブエージェント
+|-- skills/           # オンデマンドで読み込まれる 328 の再利用可能なワークフロー
+|-- commands/         # メンテナンスされている 99 のスラッシュコマンドシム
 |-- rules/            # オプトインの共通標準と言語別標準
 |-- hooks/            # ランタイムの自動化と強制
 |-- scripts/          # インストール、修復、同期、オーケストレーション、チェック
@@ -822,7 +822,7 @@ ECC/
 |   |-- plugin.json         # Plugin メタデータとコンポーネントパス
 |   |-- marketplace.json    # /plugin marketplace add 用のマーケットプレイスカタログ
 |
-|-- agents/           # 委譲用の 69 の専門サブエージェント
+|-- agents/           # 委譲用の 72 の専門サブエージェント
 |   |-- planner.md           # 機能実装の計画
 |   |-- architect.md         # システム設計の意思決定
 |   |-- tdd-guide.md         # テスト駆動開発
@@ -1200,7 +1200,7 @@ ECC の Memory Vault は、Claude、Codex、Hermes、OpenClaw、Kimi、その他
 skill のみ、minimal、manual、Claude plugin のインストールでは、Memory Vault ランタイムは `PATH` に配置されません。CLI やオプションの MCP サーバーを使う前に、npm ランタイムを別途インストールしてください：
 
 ```bash
-npm install -g ecc-universal@2.2.1
+npm install -g ecc-universal@2.2.3
 ecc memory init --scope project
 ecc memory search "authentication migration" --target-harness codex
 ecc memory doctor
@@ -1595,7 +1595,7 @@ opencode
 
 **オプション 2：npm パッケージとしてインストール**
 ```bash
-npm install ecc-universal@2.2.1
+npm install ecc-universal@2.2.3
 ```
 
 次に `opencode.json` に追加します：
