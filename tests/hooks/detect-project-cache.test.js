@@ -274,6 +274,63 @@ test('an explicit parent project still wins after the current directory becomes 
   } finally { cleanupDir(tmp); }
 });
 
+test('a key longer than the file-name limit is still cached', () => {
+  const tmp = createTempDir();
+  try {
+    const home = path.join(tmp, 'home');
+    fs.mkdirSync(home);
+    const seg = 'a'.repeat(80);
+    const repo = makeRepo(tmp, path.join(seg, seg, seg));
+
+    const first = detect(repo, home);
+    const second = detect(repo, home);
+    assert.strictEqual(first.hit, '0', 'first call must run full detection');
+    assert.strictEqual(second.hit, '1', 'a long key must still be served from the cache');
+    assert.strictEqual(second.id, first.id);
+
+    const entries = cacheEntries(home);
+    assert.strictEqual(entries.length, 1, 'one cache entry should exist');
+    const base = path.basename(entries[0]);
+    assert.ok(base.length <= 200, `file name must stay within the limit, got ${base.length}`);
+    assert.match(base, /~[0-9a-f]{8}$/, 'a long key is stored under a shortened name with a hash');
+    const keyLine = fs.readFileSync(entries[0], 'utf8').split('\n')[2];
+    assert.strictEqual(keyLine, `0||${fs.realpathSync(repo)}`, 'the stored key line keeps the full key');
+  } finally {
+    cleanupDir(tmp);
+  }
+});
+
+test('long keys that differ only in the middle get separate entries', () => {
+  const tmp = createTempDir();
+  try {
+    const home = path.join(tmp, 'home');
+    fs.mkdirSync(home);
+    const seg = 'a'.repeat(80);
+    const repoX = makeRepo(tmp, path.join(seg, seg, 'x'.repeat(80), seg, seg));
+    const repoY = makeRepo(tmp, path.join(seg, seg, 'y'.repeat(80), seg, seg));
+
+    const firstX = detect(repoX, home);
+    const firstY = detect(repoY, home);
+    assert.strictEqual(firstX.hit, '0');
+    assert.strictEqual(firstY.hit, '0');
+
+    const entries = cacheEntries(home);
+    assert.strictEqual(entries.length, 2, 'each long key gets its own entry');
+    const headers = entries.map((f) => path.basename(f).replace(/~[0-9a-f]{8}$/, ''));
+    assert.strictEqual(headers[0], headers[1], 'only the hash tells the two names apart');
+    assert.notStrictEqual(path.basename(entries[0]), path.basename(entries[1]));
+
+    const secondX = detect(repoX, home);
+    const secondY = detect(repoY, home);
+    assert.strictEqual(secondX.hit, '1');
+    assert.strictEqual(secondY.hit, '1');
+    assert.strictEqual(secondX.root, fs.realpathSync(repoX));
+    assert.strictEqual(secondY.root, fs.realpathSync(repoY));
+  } finally {
+    cleanupDir(tmp);
+  }
+});
+
 test('a nearer malformed .git file or broken link invalidates cached parent discovery', () => {
   for (const link of [false, true]) {
     const tmp = createTempDir();

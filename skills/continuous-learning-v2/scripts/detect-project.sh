@@ -370,6 +370,9 @@ atomic_write_json(registry_path, registry)
 # submodules and non-git CLAUDE_PROJECT_DIR roots are detected on every call,
 # as is a "global" result reached because no repository was found.
 #
+# A key whose sanitized form exceeds 200 characters is stored under a shortened
+# file name (head, tail and a hash of the key), so deep paths are still cached.
+#
 # Set CLV2_PROJECT_CACHE=0 to disable. The day stamp needs printf '%(...)T'
 # (bash >= 4.2); older shells such as the macOS system bash 3.2 skip the cache
 # and detect on every call, exactly as before.
@@ -380,6 +383,7 @@ _CLV2_PROJECT_CACHE_DAY=""
 _CLV2_PROJECT_CACHE_VERSION="clv2-project-cache-2"
 _CLV2_PROJECT_REMOTE_SEEN=""
 _CLV2_PROJECT_CACHE_REMOTE=""
+_CLV2_PROJECT_CACHE_HASH=""
 
 # Drop embedded credentials (https://token@host/...) so they never reach the
 # cache file. Same rule as the sed in _clv2_detect_project, without a launch:
@@ -389,6 +393,18 @@ _clv2_project_cache_remote() {
   if [[ "$1" =~ ://[^@]+@ ]]; then
     _CLV2_PROJECT_CACHE_REMOTE="${1/"${BASH_REMATCH[0]}"/://}"
   fi
+}
+
+# 32-bit FNV-1a of $1 over bytes, as 8 hex digits in _CLV2_PROJECT_CACHE_HASH.
+# Builtins only. Used to shorten a cache file name; the stored key line stays
+# the identity check, so a collision can only cost a miss.
+_clv2_project_cache_hash() {
+  local LC_ALL=C s="$1" h=2166136261 i c
+  for (( i = 0; i < ${#s}; i++ )); do
+    printf -v c '%d' "'${s:i:1}"
+    h=$(( ((h ^ (c & 255)) * 16777619) & 0xFFFFFFFF ))
+  done
+  printf -v _CLV2_PROJECT_CACHE_HASH '%08x' "$h"
 }
 
 _clv2_project_cache_prepare() {
@@ -403,7 +419,13 @@ _clv2_project_cache_prepare() {
   case "$key" in *$'\n'*|*$'\r'*) return 1 ;; esac
 
   local name="${key//[^A-Za-z0-9._-]/_}"
-  [ "${#name}" -gt 200 ] && return 1
+  # File names stay within NAME_MAX. A longer key keeps its head and tail for
+  # readability plus a hash of the whole key, so long keys that differ only in
+  # the middle still get separate entries.
+  if [ "${#name}" -gt 200 ]; then
+    _clv2_project_cache_hash "$key"
+    name="${name:0:95}~${name: -95}~${_CLV2_PROJECT_CACHE_HASH}"
+  fi
 
   printf -v _CLV2_PROJECT_CACHE_DAY '%(%Y%m%d)T' -1
   _CLV2_PROJECT_CACHE_KEY="$key"
